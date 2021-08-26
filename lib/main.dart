@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'question.dart';
+import 'package:quizler_flutter/quiz_brain.dart';
+import 'quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -27,25 +29,34 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Icon> score = [];
-  List<Question> questions = [
-    Question(q: 'You can lead a cow down stairs but not up stairs.', a: false),
-    Question(
-        q: 'Approximately one quarter of human bones are in the feet.',
-        a: true),
-    Question(q: 'A slug\'s blood is green.', a: true)
-  ];
-
-  int questionNumber = 0;
+  QuizBrain quizBrain = QuizBrain();
 
   void processQuestion(bool answer) {
-    Question q = questions[questionNumber];
-    if (answer == q.answer) {
-      print('RIGHT');
-    } else {
-      print('WRONG');
-    }
+    bool correctAnswer = quizBrain.answer();
+
     setState(() {
-      questionNumber++;
+      if (answer == correctAnswer) {
+        score.add(
+          Icon(
+            Icons.check,
+            color: Colors.green,
+          ),
+        );
+      } else {
+        score.add(
+          Icon(
+            Icons.close,
+            color: Colors.red,
+          ),
+        );
+      }
+      if (quizBrain.endOfQuizz()) {
+        quizBrain.resetQuizz();
+        score = [];
+        Alert(context: context, title: "Quizz", desc: "Quizz is done").show();
+      } else {
+        quizBrain.nextQuestion();
+      }
     });
   }
 
@@ -61,7 +72,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questions[questionNumber].question,
+                quizBrain.question(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -107,7 +118,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
+        Row(children: score)
       ],
     );
   }
